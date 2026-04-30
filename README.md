@@ -6,6 +6,7 @@ Agriculture Decision Support System
 Downloaded this file (Download zip) 
 1. Extract zip file
 2. Do ever you want
+> **Note:**  **Magic link** cannot use for now.
 
 ## Important
 
