@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriSense DSS — Agriculture Decision Support System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo-icon">
+        <img src="dss-logo.png" alt="AgriSense Logo" style="width:42px; height:42px;">
+    </div>
+    <div class="logo-text">
+        <h1>AgriSense DSS</h1>
+        <p>Agriculture Decision Support System</p>
+    </div>
+    <button id="logoutBtn" onclick="signOut()" style="
+        margin-left: auto;
+        padding: 7px 16px;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        border: 1.5px solid var(--border);
+        border-radius: 7px;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: none;
+    "
+    onmouseover="this.style.borderColor='var(--sage)';this.style.color='var(--sage-dark)'"
+    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'"
+    >ออกจากระบบ</button>
+</header>
+
+<main>
+
+    <!-- ── LEFT: MAP PANEL ── -->
+    <div class="map-panel">
+        <div class="panel-header">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <img src="compass-logo.png" alt="compass" 
+                    style="width:36px; height:36px; object-fit:contain;">
+                <div>
+                    <h2 style="font-size:18px; font-weight:700; gap:0;">Terrain Analysis Map</h2>
+                    <p style="padding-left:0; margin-top:2px;">Click to sample soil data</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="tab-btn active" id="btn-location" onclick="switchTab('location')">
+                Location-Based Prediction
+            </button>
+            <button class="tab-btn" id="btn-heatmap" onclick="switchTab('heatmap')">
+                Crop-Specific Heatmap
+            </button>
+        </div>
+
+        <div class="map-area" id="mapArea" onclick="handleMapClick(event)">
+
+            <!-- SVG Map -->
+            <div class="map-svg-container">
+                <svg id="esan" viewBox="0 0 520 560" xmlns="http://www.w3.org/2000/svg">
+                </svg>
+            </div>
+
+            <!-- Map Controls -->
+            <div class="map-controls">
+                <button class="map-ctrl-btn" title="Zoom in"  onclick="event.stopPropagation()">＋</button>
+                <button class="map-ctrl-btn" title="Zoom out" onclick="event.stopPropagation()">－</button>
+            </div>
+
+            <!-- Initial Tooltip -->
+            <div class="map-tooltip" id="mapTooltip" style="left:50%; top:50%;">
+                <span class="tt-icon">📍</span>
+                <h4>คลิกเพื่อสุ่มตัวอย่างดิน</h4>
+                <p>จำลองพิกัดและข้อมูลดิน<br>จะถูกสร้างขึ้น</p>
+            </div>
+
+            <!-- Click Pulse Effects -->
+            <div class="pulse-dot" id="pulseDot"></div>
+            <div class="pulse-ring" id="pulseRing"></div>
+
+            <!-- Heatmap Legend -->
+            <div class="heatmap-legend" id="heatmapLegend">
+                <h5>ความเหมาะสมพืช</h5>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background:#8fc87a"></div> สูง
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background:#e09a50"></div> ปานกลาง
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background:#c85a3a"></div> ต่ำ
+                </div>
+            </div>
+
+        </div><!-- /.map-area -->
+    </div><!-- /.map-panel -->
+
+    <!-- ── RIGHT: ANALYSIS PANEL ── -->
+    <div class="analysis-panel">
+
+        <div class="panel-header">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <img src="info-logo.png" alt="info" 
+                    style="width:36px; height:36px; object-fit:contain;">
+                <div>
+                    <h2 style="font-size:18px; font-weight:700; gap:0;">Analysis</h2>
+                    <p id="analysisSubtitle" style="padding-left:0; margin-top:2px;">ผลการวิเคราะห์ดินและคำแนะนำพืช</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">···</div>
+            <h3>No data yet</h3>
+            <p>คลิกที่แผนที่เพื่อวิเคราะห์ดิน<br>และรับคำแนะนำการเพาะปลูก</p>
+        </div>
+
+        <!-- Loading State -->
+        <div class="analysis-loading" id="loadingState">
+            <div class="loader-ring"></div>
+            <p>กำลังวิเคราะห์ข้อมูลดิน...</p>
+        </div>
+
+        <!-- Results (filled by JS) -->
+        <div class="analysis-results" id="analysisResults"></div>
+
+    </div><!-- /.analysis-panel -->
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="main.js"></script>
+
+<!-- ── Auth Overlay ── -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card" id="authCard">
+
+    <!-- VIEW: Login -->
+    <div class="auth-view active" id="viewLogin">
+      <img src="dss-logo.png" style="width:48px; margin-bottom:4px;">
+      <h2>AgriSense DSS</h2>
+      <p>เข้าสู่ระบบเพื่อใช้งาน</p>
+      <input type="email" id="loginEmail" placeholder="อีเมล" />
+      <input type="password" id="loginPassword" placeholder="รหัสผ่าน" />
+      <button onclick="handleSignIn()">เข้าสู่ระบบ</button>
+      <div class="auth-divider">หรือ</div>
+      <button class="secondary" onclick="goToView('viewSignup')">สมัครสมาชิกใหม่</button>
+      <button class="ghost" onclick="goToView('viewMagic')">ส่ง Magic Link แทน</button>
+      <p class="auth-error" id="loginError"></p>
+    </div>
+
+    <!-- VIEW: Sign Up -->
+    <div class="auth-view" id="viewSignup">
+      <button class="back-link" onclick="goToView('viewLogin')">← กลับ</button>
+      <img src="dss-logo.png" style="width:48px; margin-bottom:4px;">
+      <h2>สมัครสมาชิก</h2>
+      <p>สร้างบัญชีใหม่สำหรับ AgriSense</p>
+      <input type="email" id="signupEmail" placeholder="อีเมล" />
+      <input type="password" id="signupPassword" placeholder="รหัสผ่าน" />
+      <button onclick="handleSignUp()">สมัครสมาชิก</button>
+      <p class="auth-error" id="signupError"></p>
+    </div>
+
+    <!-- VIEW: Magic Link -->
+    <div class="auth-view" id="viewMagic">
+      <button class="back-link" onclick="goToView('viewLogin')">← กลับ</button>
+      <img src="dss-logo.png" style="width:48px; margin-bottom:4px;">
+      <h2>Magic Link</h2>
+      <p>รับลิงก์เข้าสู่ระบบผ่านอีเมล<br>โดยไม่ต้องใช้รหัสผ่าน</p>
+      <input type="email" id="magicEmail" placeholder="อีเมล" />
+      <button onclick="handleMagicLink()">ส่ง Magic Link</button>
+      <p class="auth-error" id="magicError"></p>
+    </div>
+
+    <!-- VIEW: Success (shared) -->
+    <div class="auth-view" id="viewSuccess">
+      <div class="success-icon" id="successIcon">✉️</div>
+      <h2 id="successTitle">ตรวจสอบอีเมล</h2>
+      <p id="successMsg">ส่งลิงก์ไปที่อีเมลของคุณแล้ว<br>กรุณาตรวจสอบกล่องจดหมาย</p>
+      <button class="secondary" onclick="goToView('viewLogin')" style="margin-top:4px;">กลับหน้าเข้าสู่ระบบ</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
