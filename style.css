@@ -737,7 +737,7 @@ main {
 
 /* Header elements */
 .auth-view h2 { font-size: 20px; font-weight: 700; }
-.auth-view > p { font-size: 12px; color: var(--text-muted); text-align: center; }
+.auth-view > p { font-size: 12px; color: #c85a3a; text-align: center; }
 
 .auth-view input {
   width: 100%;
