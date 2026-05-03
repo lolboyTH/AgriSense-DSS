@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriSense DSS — Agriculture Decision Support System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECOCROP-MAP — Agriculture Decision Support System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<header>
+  <header>
     <div class="logo-icon">
-        <img src="dss-logo.png" alt="AgriSense Logo" style="width:42px; height:42px;">
+      <img src="dss-logo.png" alt="AgriSense Logo" style="width:42px; height:42px;">
     </div>
     <div class="logo-text">
-        <h1>AgriSense DSS</h1>
-        <p>Agriculture Decision Support System</p>
+      <h1>ECOCROP-MAP</h1>
+      <p>Agriculture Decision Support System</p>
     </div>
     <div style="margin-left: auto; display: flex; gap: 8px;">
-        <button id="historyBtn" onclick="toggleHistory()" style="
+      <button id="historyBtn" onclick="toggleHistory()" style="
             padding: 7px 16px;
             font-family: 'Inter', sans-serif;
             font-size: 12px;
@@ -33,12 +37,10 @@
             cursor: pointer;
             transition: all 0.2s;
             display: none;
-        "
-        onmouseover="this.style.background='rgba(144, 169, 85, 0.2)'"
-        onmouseout="this.style.background='rgba(144, 169, 85, 0.1)'"
-        >ประวัติของฉัน</button>
+        " onmouseover="this.style.background='rgba(144, 169, 85, 0.2)'"
+        onmouseout="this.style.background='rgba(144, 169, 85, 0.1)'">ข้อมูลของฉัน</button>
 
-        <button id="logoutBtn" onclick="signOut()" style="
+      <button id="profileBtn" onclick="toggleProfile()" style="
             padding: 7px 16px;
             font-family: 'Inter', sans-serif;
             font-size: 12px;
@@ -50,203 +52,261 @@
             cursor: pointer;
             transition: all 0.2s;
             display: none;
-        "
-        onmouseover="this.style.borderColor='var(--sage)';this.style.color='var(--sage-dark)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'"
-        >ออกจากระบบ</button>
-    </div>
-</header>
+        " onmouseover="this.style.borderColor='var(--sage)';this.style.color='var(--sage-dark)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">👤 โปรไฟล์</button>
 
-<main>
+      <button id="logoutBtn" onclick="signOut()" style="
+            padding: 7px 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        " onmouseover="this.style.borderColor='var(--sage)';this.style.color='var(--sage-dark)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">ออกจากระบบ</button>
+    </div>
+  </header>
+
+  <main>
 
     <!-- ── LEFT: MAP PANEL ── -->
     <div class="map-panel">
-        <div class="panel-header">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <img src="compass-logo.png" alt="compass" 
-                    style="width:36px; height:36px; object-fit:contain;">
-                <div>
-                    <h2 style="font-size:18px; font-weight:700; gap:0;">Terrain Analysis Map</h2>
-                    <p style="padding-left:0; margin-top:2px;">Click to sample soil data</p>
-                </div>
-            </div>
+      <div class="panel-header">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <img src="compass-logo.png" alt="compass" style="width:36px; height:36px; object-fit:contain;">
+          <div>
+            <h2 style="font-size:18px; font-weight:700; gap:0;">Terrain Analysis Map</h2>
+            <p style="padding-left:0; margin-top:2px;">Click to sample soil data</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="tab-btn active" id="btn-location" onclick="switchTab('location')">
+          Location-Based Prediction
+        </button>
+        <button class="tab-btn" id="btn-heatmap" onclick="switchTab('heatmap')">
+          Crop-Specific Heatmap
+        </button>
+        <select id="yearSelect" onchange="updateMapOverlay()"
+          style="margin-left: auto; padding: 4px 8px; font-family: 'Inter', sans-serif; font-size: 12px; border-radius: 6px; border: 1.5px solid var(--border); outline: none;">
+          <option value="current">Current</option>
+          <option value="2021-2040">2021-2040</option>
+          <option value="2041-2060">2041-2060</option>
+          <option value="2061-2080">2061-2080</option>
+          <option value="2081-2100">2081-2100</option>
+        </select>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label for="layer-opacity"
+            style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Opacity</label>
+          <input type="range" id="layer-opacity" min="0" max="1" step="0.1" value="0.7" oninput="updateMapOverlay()"
+            style="width: 60px;">
+        </div>
+      </div>
+
+      <div class="map-area" id="mapArea">
+
+        <!-- Leaflet Map -->
+        <div id="map" style="width:100%; height:100%; z-index:1;"></div>
+
+        <!-- Search Bar -->
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="ค้นหาสถานที่, ตำบล, อำเภอ..."
+            onkeypress="if(event.key === 'Enter') searchLocation()">
+          <button onclick="searchLocation()">🔍</button>
         </div>
 
-        <div class="toolbar">
-            <button class="tab-btn active" id="btn-location" onclick="switchTab('location')">
-                Location-Based Prediction
-            </button>
-            <button class="tab-btn" id="btn-heatmap" onclick="switchTab('heatmap')">
-                Crop-Specific Heatmap
-            </button>
-            <select id="yearSelect" onchange="updateMapOverlay()" style="margin-left: auto; padding: 4px 8px; font-family: 'Inter', sans-serif; font-size: 12px; border-radius: 6px; border: 1.5px solid var(--border); outline: none;">
-                <option value="current">Current</option>
-                <option value="2021-2040">2021-2040</option>
-                <option value="2041-2060">2041-2060</option>
-                <option value="2061-2080">2061-2080</option>
-                <option value="2081-2100">2081-2100</option>
-            </select>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <label for="layer-opacity" style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Opacity</label>
-                <input type="range" id="layer-opacity" min="0" max="1" step="0.1" value="0.7" oninput="updateMapOverlay()" style="width: 60px;">
-            </div>
+        <!-- Map Controls -->
+        <div class="map-controls">
+          <button class="map-ctrl-btn" id="gpsBtn" title="Find My Location"
+            onclick="findMyLocation(); event.stopPropagation();">🎯</button>
         </div>
 
-        <div class="map-area" id="mapArea">
+        <!-- Initial Tooltip -->
+        <div class="map-tooltip" id="mapTooltip" style="left:50%; top:50%;">
+          <span class="tt-icon">📍</span>
+          <h4>คลิกเพื่อสุ่มตัวอย่างดิน</h4>
+          <p>จำลองพิกัดและข้อมูลดิน<br>จะถูกสร้างขึ้น</p>
+        </div>
 
-            <!-- Leaflet Map -->
-            <div id="map" style="width:100%; height:100%; z-index:1;"></div>
+        <!-- Click Pulse Effects -->
+        <div class="pulse-dot" id="pulseDot"></div>
+        <div class="pulse-ring" id="pulseRing"></div>
 
-            <!-- Search Bar -->
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="ค้นหาสถานที่, ตำบล, อำเภอ..." onkeypress="if(event.key === 'Enter') searchLocation()">
-                <button onclick="searchLocation()">🔍</button>
-            </div>
+        <!-- Heatmap Legend -->
+        <div class="heatmap-legend" id="heatmapLegend" style="z-index: 2;">
+          <h5>ความเหมาะสมพืช</h5>
+          <div class="legend-gradient"></div>
+          <div
+            style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+            <span>0.0 (Low)</span>
+            <span>1.0 (High)</span>
+          </div>
+        </div>
 
-            <!-- Map Controls -->
-            <div class="map-controls">
-                <button class="map-ctrl-btn" id="gpsBtn" title="Find My Location" onclick="findMyLocation(); event.stopPropagation();">🎯</button>
-            </div>
-
-            <!-- Initial Tooltip -->
-            <div class="map-tooltip" id="mapTooltip" style="left:50%; top:50%;">
-                <span class="tt-icon">📍</span>
-                <h4>คลิกเพื่อสุ่มตัวอย่างดิน</h4>
-                <p>จำลองพิกัดและข้อมูลดิน<br>จะถูกสร้างขึ้น</p>
-            </div>
-
-            <!-- Click Pulse Effects -->
-            <div class="pulse-dot" id="pulseDot"></div>
-            <div class="pulse-ring" id="pulseRing"></div>
-
-            <!-- Heatmap Legend -->
-            <div class="heatmap-legend" id="heatmapLegend" style="z-index: 2;">
-                <h5>ความเหมาะสมพืช</h5>
-                <div class="legend-gradient"></div>
-                <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-                    <span>0.0 (Low)</span>
-                    <span>1.0 (High)</span>
-                </div>
-            </div>
-
-        </div><!-- /.map-area -->
+      </div><!-- /.map-area -->
     </div><!-- /.map-panel -->
 
     <!-- ── RIGHT: ANALYSIS PANEL ── -->
     <div class="analysis-panel">
 
-        <div class="panel-header">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <img src="info-logo.png" alt="info" 
-                    style="width:36px; height:36px; object-fit:contain;">
-                <div>
-                    <h2 style="font-size:18px; font-weight:700; gap:0;">Analysis</h2>
-                    <p id="analysisSubtitle" style="padding-left:0; margin-top:2px;">ผลการวิเคราะห์ดินและคำแนะนำพืช</p>
-                </div>
-            </div>
+      <div class="panel-header">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <img src="info-logo.png" alt="info" style="width:36px; height:36px; object-fit:contain;">
+          <div>
+            <h2 style="font-size:18px; font-weight:700; gap:0;">Analysis</h2>
+            <p id="analysisSubtitle" style="padding-left:0; margin-top:2px;">ผลการวิเคราะห์ดินและคำแนะนำพืช</p>
+          </div>
         </div>
+      </div>
 
-        <!-- Empty State -->
-        <div class="empty-state" id="emptyState">
-            <div class="empty-icon">···</div>
-            <h3>No data yet</h3>
-            <p>คลิกที่แผนที่เพื่อวิเคราะห์ดิน<br>และรับคำแนะนำการเพาะปลูก</p>
-        </div>
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">···</div>
+        <h3>No data yet</h3>
+        <p>คลิกที่แผนที่เพื่อวิเคราะห์ดิน<br>และรับคำแนะนำการเพาะปลูก</p>
+      </div>
 
-        <!-- Loading State -->
-        <div class="analysis-loading" id="loadingState">
-            <div class="loader-ring"></div>
-            <p>กำลังวิเคราะห์ข้อมูลดิน...</p>
-        </div>
+      <!-- Loading State -->
+      <div class="analysis-loading" id="loadingState">
+        <div class="loader-ring"></div>
+        <p>กำลังวิเคราะห์ข้อมูลดิน...</p>
+      </div>
 
-        <!-- Results (filled by JS) -->
-        <div class="analysis-results" id="analysisResults"></div>
+      <!-- Results (filled by JS) -->
+      <div class="analysis-results" id="analysisResults"></div>
 
     </div><!-- /.analysis-panel -->
 
-</main>
+  </main>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/geotiff"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="main.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/geotiff"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="main.js"></script>
 
-<!-- ── Auth Overlay ── -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-card" id="authCard">
+  <!-- ── Auth Overlay ── -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-card" id="authCard">
 
-    <!-- VIEW: Login -->
-    <div class="auth-view active" id="viewLogin">
-      <img src="dss-logo.png" style="width:48px; margin-bottom:4px;">
-      <h2>AgriSense DSS</h2>
-      <p>เข้าสู่ระบบเพื่อใช้งาน</p>
-      <input type="email" id="loginEmail" placeholder="อีเมล" />
-      <input type="password" id="loginPassword" placeholder="รหัสผ่าน" />
-      <button onclick="handleSignIn()">เข้าสู่ระบบ</button>
-      <div class="auth-divider">หรือ</div>
-      <button class="secondary" onclick="goToView('viewSignup')">สมัครสมาชิกใหม่</button>
-      <button class="ghost" onclick="goToView('viewMagic')">ส่ง Magic Link แทน</button>
-      <p class="auth-error" id="loginError"></p>
+      <!-- VIEW: Login -->
+      <div class="auth-view active" id="viewLogin">
+        <img src="dss-logo.png" style="width:48px; margin-bottom:4px;">
+        <h2>ECOCROP DSS</h2>
+        <p style="color: #000;">เข้าสู่ระบบเพื่อใช้งาน</p>
+        <input type="email" id="loginEmail" placeholder="อีเมล" />
+        <input type="password" id="loginPassword" placeholder="รหัสผ่าน" />
+        <button onclick="handleSignIn()">เข้าสู่ระบบ</button>
+        <div class="auth-divider">หรือ</div>
+        <button class="secondary" onclick="goToView('viewSignup')">สมัครสมาชิกใหม่</button>
+        <p class="auth-error" id="loginError"></p>
+      </div>
+
+      <!-- VIEW: Sign Up -->
+      <div class="auth-view" id="viewSignup">
+        <button class="back-link" onclick="goToView('viewLogin')">← กลับ</button>
+        <img src="dss-logo.png" style="width:48px; margin-bottom:4px;">
+        <h2>สมัครสมาชิก</h2>
+        <p style="color: #000;">สร้างบัญชีใหม่สำหรับ AgriSense</p>
+        <input type="email" id="signupEmail" placeholder="อีเมล" />
+        <input type="password" id="signupPassword" placeholder="รหัสผ่าน" />
+        <button onclick="handleSignUp()">สมัครสมาชิก</button>
+        <p class="auth-error" id="signupError"></p>
+      </div>
+
+
+
+      <!-- VIEW: Success (shared) -->
+      <div class="auth-view" id="viewSuccess">
+        <div class="success-icon" id="successIcon">✉️</div>
+        <h2 id="successTitle">ตรวจสอบอีเมล</h2>
+        <p id="successMsg">ส่งลิงก์ไปที่อีเมลของคุณแล้ว<br>กรุณาตรวจสอบกล่องจดหมาย</p>
+        <button class="secondary" onclick="goToView('viewLogin')" style="margin-top:4px;">กลับหน้าเข้าสู่ระบบ</button>
+      </div>
+
     </div>
-
-    <!-- VIEW: Sign Up -->
-    <div class="auth-view" id="viewSignup">
-      <button class="back-link" onclick="goToView('viewLogin')">← กลับ</button>
-      <img src="dss-logo.png" style="width:48px; margin-bottom:4px;">
-      <h2>สมัครสมาชิก</h2>
-      <p>สร้างบัญชีใหม่สำหรับ AgriSense</p>
-      <input type="email" id="signupEmail" placeholder="อีเมล" />
-      <input type="password" id="signupPassword" placeholder="รหัสผ่าน" />
-      <button onclick="handleSignUp()">สมัครสมาชิก</button>
-      <p class="auth-error" id="signupError"></p>
-    </div>
-
-    <!-- VIEW: Magic Link -->
-    <div class="auth-view" id="viewMagic">
-      <button class="back-link" onclick="goToView('viewLogin')">← กลับ</button>
-      <img src="dss-logo.png" style="width:48px; margin-bottom:4px;">
-      <h2>Magic Link</h2>
-      <p>รับลิงก์เข้าสู่ระบบผ่านอีเมล<br>โดยไม่ต้องใช้รหัสผ่าน</p>
-      <input type="email" id="magicEmail" placeholder="อีเมล" />
-      <button onclick="handleMagicLink()">ส่ง Magic Link</button>
-      <p class="auth-error" id="magicError"></p>
-    </div>
-
-    <!-- VIEW: Success (shared) -->
-    <div class="auth-view" id="viewSuccess">
-      <div class="success-icon" id="successIcon">✉️</div>
-      <h2 id="successTitle">ตรวจสอบอีเมล</h2>
-      <p id="successMsg">ส่งลิงก์ไปที่อีเมลของคุณแล้ว<br>กรุณาตรวจสอบกล่องจดหมาย</p>
-      <button class="secondary" onclick="goToView('viewLogin')" style="margin-top:4px;">กลับหน้าเข้าสู่ระบบ</button>
-    </div>
-
   </div>
-</div>
 
-<!-- ── History Sidebar ── -->
-<div id="historyOverlay" class="history-overlay" onclick="if(event.target===this) toggleHistory()">
-  <div class="history-sidebar" id="historySidebar">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-      <h2 style="font-size: 18px; color: var(--sage-dark); margin: 0; display: flex; align-items: center; gap: 8px;">
-        <span>🕒</span> ข้อมูลของฉัน
-      </h2>
-      <button onclick="toggleHistory()" style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted);">&times;</button>
-    </div>
-    
-    <!-- Sidebar Tabs -->
-    <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+  <!-- ── History Sidebar ── -->
+  <div id="historyOverlay" class="history-overlay" onclick="if(event.target===this) toggleHistory()">
+    <div class="history-sidebar" id="historySidebar">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="font-size: 18px; color: var(--sage-dark); margin: 0; display: flex; align-items: center; gap: 8px;">
+          <span></span> ข้อมูลของฉัน
+        </h2>
+        <button onclick="toggleHistory()"
+          style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted);">&times;</button>
+      </div>
+
+      <!-- Sidebar Tabs -->
+      <div
+        style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
         <button class="sidebar-tab active" id="tab-recent" onclick="switchSidebarTab('recent')">ประวัติล่าสุด</button>
         <button class="sidebar-tab" id="tab-saved" onclick="switchSidebarTab('saved')">⭐ แปลงโปรด</button>
-    </div>
+      </div>
 
-    <div id="historyLoading" style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 13px; display: none;">
-      กำลังโหลดข้อมูล...
-    </div>
-    <div id="historyContent" style="display: flex; flex-direction: column; gap: 12px;">
-      <!-- History/Saved cards injected here -->
+      <div id="historyLoading"
+        style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 13px; display: none;">
+        กำลังโหลดข้อมูล...
+      </div>
+      <div id="historyContent" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- History/Saved cards injected here -->
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- ── Profile Overlay ── -->
+  <div id="profileOverlay" class="history-overlay" onclick="if(event.target===this) toggleProfile()">
+    <div class="history-sidebar" id="profileSidebar">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 18px; color: var(--sage-dark); margin: 0; display: flex; align-items: center; gap: 8px;">
+          <span>👤</span> โปรไฟล์
+        </h2>
+        <button onclick="toggleProfile()"
+          style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted);">&times;</button>
+      </div>
+
+      <!-- Email Section -->
+      <div
+        style="background: #fafaf9; border: 1.5px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+        <label
+          style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">อีเมล</label>
+        <p id="profileEmail"
+          style="font-size: 14px; font-weight: 500; color: var(--text-main); margin-top: 6px; word-break: break-all;">—
+        </p>
+      </div>
+
+      <!-- Change Password Section -->
+      <div style="background: #fafaf9; border: 1.5px solid var(--border); border-radius: 10px; padding: 16px;">
+        <label
+          style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: block;">เปลี่ยนรหัสผ่าน</label>
+        <input type="password" id="newPassword" placeholder="รหัสผ่านใหม่" style="
+        width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+        font-size: 13px; font-family: 'Inter', sans-serif; background: white; outline: none;
+        transition: border-color 0.2s; margin-bottom: 8px; box-sizing: border-box;
+      " onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
+        <input type="password" id="confirmPassword" placeholder="ยืนยันรหัสผ่านใหม่" style="
+        width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+        font-size: 13px; font-family: 'Inter', sans-serif; background: white; outline: none;
+        transition: border-color 0.2s; margin-bottom: 12px; box-sizing: border-box;
+      " onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
+        <button onclick="handleChangePassword()" style="
+        width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600;
+        cursor: pointer; border: 1.5px solid var(--sage); background: var(--sage); color: white;
+        transition: all 0.2s; font-family: 'Inter', sans-serif;
+      " onmouseover="this.style.background='var(--sage-dark)';this.style.borderColor='var(--sage-dark)'"
+          onmouseout="this.style.background='var(--sage)';this.style.borderColor='var(--sage)'">บันทึกรหัสผ่านใหม่</button>
+        <p id="profileMsg"
+          style="font-size: 11px; text-align: center; min-height: 16px; margin-top: 8px; color: #c85a3a;"></p>
+      </div>
+    </div>
+  </div>
 
 </body>
+
 </html>

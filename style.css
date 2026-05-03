@@ -46,7 +46,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 1100;
 }
 
 .auth-card {
@@ -771,7 +771,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 1100;
 }
 
 .auth-card {
@@ -826,21 +826,16 @@ main {
 }
 
 /* Header elements */
-<<<<<<< Updated upstream
-.auth-view h2 { font-size: 20px; font-weight: 700; }
-.auth-view > p { font-size: 12px; color: #c85a3a; text-align: center; }
-=======
 .auth-view h2 {
   font-size: 20px;
   font-weight: 700;
 }
 
-.auth-view>p {
+.auth-view > p {
   font-size: 12px;
   color: #c85a3a;
   text-align: center;
 }
->>>>>>> Stashed changes
 
 .auth-view input {
   width: 100%;
