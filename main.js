@@ -224,13 +224,7 @@ async function signUp() {
   else showAuthError('✅ ตรวจสอบอีเมลเพื่อยืนยัน');
 }
 
-async function magicLink() {
-  const email = document.getElementById('authEmail').value;
-  if (!email) { showAuthError('กรุณากรอกอีเมล'); return; }
-  const { error } = await sb.auth.signInWithOtp({ email });
-  if (error) showAuthError(error.message);
-  else showAuthError('✅ ส่ง Magic Link ไปที่อีเมลแล้ว');
-}
+
 
 async function signOut() {
   await sb.auth.signOut();
@@ -248,7 +242,7 @@ function goToView(nextId) {
   const next    = document.getElementById(nextId);
 
   // Clear errors
-  ['loginError','signupError','magicError'].forEach(id => {
+  ['loginError','signupError'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = '';
   });
@@ -318,25 +312,54 @@ async function handleSignUp() {
   }
 }
 
-async function handleMagicLink() {
-  const email = document.getElementById('magicEmail').value;
-  if (!email) {
-    document.getElementById('magicError').textContent = 'กรุณากรอกอีเมล';
+// ── Profile Functions ───────────────────────────────────────
+function toggleProfile() {
+  const overlay = document.getElementById('profileOverlay');
+  overlay.classList.toggle('visible');
+  if (overlay.classList.contains('visible') && currentUser) {
+    document.getElementById('profileEmail').textContent = currentUser.email;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    document.getElementById('profileMsg').textContent = '';
+  }
+}
+
+async function handleChangePassword() {
+  const newPw = document.getElementById('newPassword').value;
+  const confirmPw = document.getElementById('confirmPassword').value;
+  const msgEl = document.getElementById('profileMsg');
+
+  if (!newPw) {
+    msgEl.style.color = '#c85a3a';
+    msgEl.textContent = 'กรุณากรอกรหัสผ่านใหม่';
     return;
   }
-  const btn = document.querySelector('#viewMagic button');
-  btn.textContent = 'กำลังส่ง…';
-  btn.classList.add('loading');
-  const { error } = await sb.auth.signInWithOtp({ email });
-  btn.textContent = 'ส่ง Magic Link';
-  btn.classList.remove('loading');
-  if (error) {
-    document.getElementById('magicError').textContent = error.message;
-  } else {
-    document.getElementById('successIcon').textContent = '✉️';
-    document.getElementById('successTitle').textContent = 'ตรวจสอบอีเมล';
-    document.getElementById('successMsg').innerHTML = `ส่ง Magic Link ไปที่<br><strong>${email}</strong><br>แล้ว กรุณาตรวจสอบกล่องจดหมาย`;
-    goToView('viewSuccess');
+  if (newPw.length < 6) {
+    msgEl.style.color = '#c85a3a';
+    msgEl.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+    return;
+  }
+  if (newPw !== confirmPw) {
+    msgEl.style.color = '#c85a3a';
+    msgEl.textContent = 'รหัสผ่านไม่ตรงกัน';
+    return;
+  }
+
+  try {
+    const { error } = await sb.auth.updateUser({ password: newPw });
+    if (error) {
+      msgEl.style.color = '#c85a3a';
+      msgEl.textContent = error.message;
+    } else {
+      msgEl.style.color = 'var(--sage-dark)';
+      msgEl.textContent = '✅ เปลี่ยนรหัสผ่านสำเร็จ';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+    }
+  } catch (err) {
+    msgEl.style.color = '#c85a3a';
+    msgEl.textContent = 'เกิดข้อผิดพลาด';
+    console.error(err);
   }
 }
 
@@ -938,11 +961,13 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('authOverlay').style.display = 'none';
       document.getElementById('logoutBtn').style.display = 'block';
       document.getElementById('historyBtn').style.display = 'block';
+      document.getElementById('profileBtn').style.display = 'block';
       currentUser = session.user;
     } else {
       document.getElementById('authOverlay').style.display = 'flex';
       document.getElementById('logoutBtn').style.display = 'none';
       document.getElementById('historyBtn').style.display = 'none';
+      document.getElementById('profileBtn').style.display = 'none';
     }
   });
 
